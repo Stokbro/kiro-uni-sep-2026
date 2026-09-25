@@ -1,0 +1,33 @@
+# Local lesson-tracking notes — never commit
+LESSONS.local.md
+*.local.md
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Testing / hypothesis
+.pytest_cache/
+.hypothesis/
+.coverage
+htmlcov/
+
+# Local database
+*.db
+~/.yoyo-tracker/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Env
+.env
