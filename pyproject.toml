@@ -37,6 +37,11 @@ line-length = 90
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+# FastAPI's dependency-injection idiom relies on function calls (Depends, Query) in
+# argument defaults; B008 flags that as a false positive here.
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
