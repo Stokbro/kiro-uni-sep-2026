@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Community Feed · Yoyo Tracker{% endblock %}
+{% block content %}
+<h1>Community Feed</h1>
+
+<div class="feed-toggle">
+  <a href="/feed" class="{{ '' if show_all else 'active' }}">Matching my yoyos</a>
+  <a href="/feed?all=true" class="{{ 'active' if show_all else '' }}">All posts</a>
+</div>
+
+{% if unavailable %}
+<p class="empty">The community feed isn't wired up yet — coming with the Reddit integration.</p>
+{% elif posts %}
+<ul class="posts">
+  {% for p in posts %}
+  <li class="post">
+    <a href="{{ p.url }}" target="_blank" rel="noopener">{{ p.title }}</a>
+    <span class="muted">r/{{ p.subreddit }} · ▲ {{ p.score }}{% if p.author %} · u/{{ p.author }}{% endif %}</span>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty">No posts to show.</p>
+{% endif %}
+{% endblock %}

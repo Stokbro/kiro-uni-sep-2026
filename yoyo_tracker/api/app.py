@@ -6,11 +6,17 @@ domain exceptions to HTTP responses, and mounts the API router.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
+from yoyo_tracker.api.pages import pages
 from yoyo_tracker.api.routes import router
 from yoyo_tracker.core import db
+
+STATIC_DIR = Path(__file__).parent.parent / "static"
 
 
 def create_app() -> FastAPI:
@@ -29,6 +35,8 @@ def create_app() -> FastAPI:
         return JSONResponse(status_code=409, content={"detail": str(exc)})
 
     app.include_router(router)
+    app.include_router(pages)
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
     return app
 
 

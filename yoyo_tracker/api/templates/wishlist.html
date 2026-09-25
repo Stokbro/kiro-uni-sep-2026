@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Wishlist · Yoyo Tracker{% endblock %}
+{% block content %}
+<h1>Wishlist</h1>
+
+<form class="search" method="get" action="/wishlist">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search by name or brand…">
+  <button type="submit">Search</button>
+</form>
+
+<form class="add-form" data-endpoint="/api/wishlist" data-reload="1">
+  <input name="name" placeholder="Name" required>
+  <input name="brand" placeholder="Brand" required>
+  <input name="max_price" type="number" step="0.01" min="0" placeholder="Max price (optional)">
+  <button type="submit">Add to wishlist</button>
+</form>
+
+{% if wishlist %}
+<table class="grid">
+  <thead>
+    <tr><th>Name</th><th>Brand</th><th>Max price</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for w in wishlist %}
+    <tr>
+      <td>{{ w.name }}</td>
+      <td>{{ w.brand }}</td>
+      <td>{% if w.max_price is not none %}${{ w.max_price }}{% else %}—{% endif %}</td>
+      <td>
+        <button data-acquire="/api/wishlist/{{ w.id }}/acquire">Acquire</button>
+        <button class="danger" data-delete="/api/wishlist/{{ w.id }}">Remove</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Wishlist is empty. Add something above.</p>
+{% endif %}
+{% endblock %}

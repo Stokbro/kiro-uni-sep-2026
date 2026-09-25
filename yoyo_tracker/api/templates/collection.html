@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Collection · Yoyo Tracker{% endblock %}
+{% block content %}
+<h1>Collection</h1>
+
+<form class="search" method="get" action="/collection">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search by name or brand…">
+  <button type="submit">Search</button>
+</form>
+
+<form class="add-form" data-endpoint="/api/collection" data-reload="1">
+  <input name="name" placeholder="Name" required>
+  <input name="brand" placeholder="Brand" required>
+  <input name="colorway" placeholder="Colorway (optional)">
+  <select name="condition">
+    <option value="mint">mint</option>
+    <option value="good" selected>good</option>
+    <option value="played">played</option>
+  </select>
+  <button type="submit">Add yoyo</button>
+</form>
+
+{% if collection %}
+<table class="grid">
+  <thead>
+    <tr><th>Name</th><th>Brand</th><th>Colorway</th><th>Condition</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for y in collection %}
+    <tr>
+      <td>{{ y.name }}</td>
+      <td>{{ y.brand }}</td>
+      <td>{{ y.colorway or "—" }}</td>
+      <td><span class="badge">{{ y.condition }}</span></td>
+      <td>
+        <button class="danger" data-delete="/api/collection/{{ y.id }}">Remove</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No yoyos match. Add one above.</p>
+{% endif %}
+{% endblock %}

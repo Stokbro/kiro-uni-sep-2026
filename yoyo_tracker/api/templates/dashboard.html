@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Yoyo Tracker{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<section class="stats">
+  <div class="stat">
+    <span class="stat-num">{{ collection_count }}</span>
+    <span class="stat-label">In collection</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">{{ wishlist_count }}</span>
+    <span class="stat-label">On wishlist</span>
+  </div>
+</section>
+
+<section>
+  <h2>Recent collection</h2>
+  {% if collection %}
+  <ul class="cards">
+    {% for y in collection[-6:] %}
+    <li class="card">
+      <strong>{{ y.name }}</strong>
+      <span class="muted">{{ y.brand }}</span>
+      <span class="badge">{{ y.condition }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">No yoyos yet. <a href="/collection">Add one →</a></p>
+  {% endif %}
+</section>
+
+<section>
+  <h2>Wishlist</h2>
+  {% if wishlist %}
+  <ul class="cards">
+    {% for w in wishlist[-6:] %}
+    <li class="card">
+      <strong>{{ w.name }}</strong>
+      <span class="muted">{{ w.brand }}</span>
+      {% if w.max_price is not none %}<span class="badge">≤ ${{ w.max_price }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">Wishlist is empty. <a href="/wishlist">Add something →</a></p>
+  {% endif %}
+</section>
+{% endblock %}
