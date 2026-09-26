@@ -73,6 +73,23 @@ These are non-negotiable business rules. Enforce them in `core/`, not in the API
   (mock external HTTP).
 - A feature isn't done until its tests pass.
 
+## UI Verification
+
+- Automated tests (`pytest` + FastAPI `TestClient`) cover route behaviour and rendered
+  HTML content — that is the primary, committed verification and it must stay green.
+- For a live check of the running app, fetch the server-rendered HTML directly
+  (`Invoke-WebRequest`/`curl` against a locally running `uvicorn`) and assert on the
+  rendered markup and the JSON API. The pages are server-rendered (Jinja2), so the
+  fetched HTML is the real DOM — no browser needed. This is bounded and reliable.
+- Do **not** drive `playwright-cli` from the shell on this (Windows) setup: it spawns a
+  node+chromium process tree that never releases the shell's stdout pipe, so the call
+  hangs indefinitely and leaves orphan chrome/cmd windows. The built-in `browser` tool
+  also refuses loopback URLs, so it can't reach the local dev server either. Live
+  verification here is HTML-fetch, not a browser.
+- When verifying live: start the app with a throwaway `YOYO_DB_PATH`, fetch the pages,
+  then stop the server. Never point live checks at the real
+  `~/.yoyo-tracker/data.db`.
+
 ## Error Handling
 
 - `core/` raises specific exceptions (e.g. `YoyoNotFound`, `DuplicateYoyo`) — define
