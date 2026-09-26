@@ -1,0 +1,21 @@
+{
+  "name": "yoyo-dev",
+  "description": "Development agent for the Yoyo Tracker. Knows the layered architecture and conventions, can run the project's own tooling without prompting, and can fetch public community/store data via MCP.",
+  "tools": ["read", "write", "shell", "fetch___fetch"],
+  "excludedTools": ["knowledge"],
+  "includeMcpJson": true,
+  "includePowers": false,
+  "resources": [
+    "file://.kiro/specs/yoyo-tracker.md",
+    "file://.kiro/steering/conventions.md"
+  ],
+  "permissions": {
+    "rules": [
+      { "capability": "shell", "match": ["ruff *", "pytest *", "python -m *", "git status", "git diff*", "git add *", "git commit *"], "effect": "allow" },
+      { "capability": "shell", "match": ["rm *", "del *", "git push*", "git reset *"], "effect": "deny" }
+    ]
+  },
+  "prompt": "You are the Yoyo Tracker development agent. Uphold the layered architecture at all times: core/ is pure Python (no FastAPI/web imports), api/ is a thin translation layer over core, and templates are dumb. Enforce the four product invariants (collection/wishlist mutual exclusion, valid availability status, atomic acquire, search-returns-subset). After any code change, run ruff and the touched tests before reporting done. Use the fetch MCP tool only for public Reddit .json endpoints and public store pages \u2014 never for anything requiring credentials.",
+  "model": "claude-sonnet-5",
+  "welcomeMessage": "Yoyo Tracker dev agent ready. Core stays pure, API stays thin \u2014 what are we building?"
+}
