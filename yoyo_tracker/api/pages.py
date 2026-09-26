@@ -10,7 +10,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from yoyo_tracker.api.deps import get_conn
-from yoyo_tracker.core import db
+from yoyo_tracker.core import db, reddit
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
@@ -64,11 +64,18 @@ def wishlist_page(
 
 
 @pages.get("/feed", response_class=HTMLResponse)
-def feed_page(request: Request, all: bool = False) -> HTMLResponse:
-    # The Reddit feed is wired in once core/reddit.py lands; render an empty state
-    # for now so the page exists and the nav works.
+async def feed_page(
+    request: Request,
+    all: bool = False,
+    conn: sqlite3.Connection = Depends(get_conn),
+) -> HTMLResponse:
+    posts = await reddit.fetch_feed()
+    if not all:
+        names = [y.name for y in db.list_collection(conn)]
+        names += [w.name for w in db.list_wishlist(conn)]
+        posts = reddit.filter_posts(posts, names)
     return templates.TemplateResponse(
         request,
         "feed.html",
-        {"posts": [], "show_all": all, "unavailable": True},
+        {"posts": posts, "show_all": all},
     )

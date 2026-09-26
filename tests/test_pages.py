@@ -35,7 +35,14 @@ def test_wishlist_page_renders(client: TestClient) -> None:
     assert _is_html(client.get("/wishlist"))
 
 
-def test_feed_page_renders(client: TestClient) -> None:
+def test_feed_page_renders(client: TestClient, monkeypatch) -> None:
+    from yoyo_tracker.api import pages
+    from yoyo_tracker.core.models import RedditPost
+
+    async def fake_fetch(limit: int = 25) -> list[RedditPost]:
+        return []
+
+    monkeypatch.setattr(pages.reddit, "fetch_feed", fake_fetch)
     resp = client.get("/feed")
     assert _is_html(resp)
     assert "Community Feed" in resp.text

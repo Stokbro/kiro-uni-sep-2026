@@ -11,8 +11,10 @@ import sqlite3
 from fastapi import APIRouter, Depends, Query
 
 from yoyo_tracker.api.deps import get_conn
-from yoyo_tracker.core import db
+from yoyo_tracker.core import availability, db, reddit
 from yoyo_tracker.core.models import (
+    RedditPost,
+    StoreResult,
     WishlistItemIn,
     WishlistItemOut,
     YoyoIn,
@@ -49,6 +51,20 @@ def delete_from_collection(
     db.remove_yoyo(conn, yoyo_id)
 
 
+@router.get("/collection/{yoyo_id}/availability", response_model=list[StoreResult])
+async def get_availability(
+    yoyo_id: int,
+    conn: sqlite3.Connection = Depends(get_conn),
+) -> list[StoreResult]:
+    """Check store availability for a collection yoyo by its name.
+
+    Raises ``YoyoNotFound`` (mapped to 404) if the id is unknown; the store lookup
+    itself never fails — an unreachable store degrades to ``unknown`` in core.
+    """
+    yoyo = db.get_yoyo(conn, yoyo_id)
+    return await availability.check_availability(yoyo.name)
+
+
 # ---- Wishlist ------------------------------------------------------------------
 
 
@@ -82,3 +98,28 @@ def acquire_wishlist_item(
     conn: sqlite3.Connection = Depends(get_conn),
 ) -> YoyoOut:
     return db.acquire(conn, item_id)
+
+
+# ---- Community feed ------------------------------------------------------------
+
+
+@router.get("/feed", response_model=list[RedditPost])
+async def get_feed(
+    all: bool = Query(False, description="Return all posts, not just tracked matches."),
+    conn: sqlite3.Connection = Depends(get_conn),
+) -> list[RedditPost]:
+    """Recent community posts. By default filtered to posts mentioning a tracked yoyo
+    (collection + wishlist names); ``all=true`` returns the unfiltered feed.
+    """
+    posts = await reddit.fetch_feed()
+    if all:
+        return posts
+    tracked = _tracked_names(conn)
+    return reddit.filter_posts(posts, tracked)
+
+
+def _tracked_names(conn: sqlite3.Connection) -> list[str]:
+    """All names being tracked across collection and wishlist."""
+    names = [y.name for y in db.list_collection(conn)]
+    names += [w.name for w in db.list_wishlist(conn)]
+    return names

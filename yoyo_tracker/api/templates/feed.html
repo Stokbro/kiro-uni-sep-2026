@@ -8,9 +8,7 @@
   <a href="/feed?all=true" class="{{ 'active' if show_all else '' }}">All posts</a>
 </div>
 
-{% if unavailable %}
-<p class="empty">The community feed isn't wired up yet — coming with the Reddit integration.</p>
-{% elif posts %}
+{% if posts %}
 <ul class="posts">
   {% for p in posts %}
   <li class="post">
@@ -20,6 +18,6 @@
   {% endfor %}
 </ul>
 {% else %}
-<p class="empty">No posts to show.</p>
+<p class="empty">{% if show_all %}No posts to show.{% else %}No community posts mention a yoyo you're tracking right now.{% endif %}</p>
 {% endif %}
 {% endblock %}

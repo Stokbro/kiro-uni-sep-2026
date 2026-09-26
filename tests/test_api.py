@@ -98,3 +98,54 @@ def test_acquire_moves_item(client: TestClient) -> None:
 def test_acquire_missing_returns_404(client: TestClient) -> None:
     resp = client.post("/api/wishlist/999/acquire")
     assert resp.status_code == 404
+
+
+
+# ---- Availability + feed endpoints (core patched to avoid network) -------------
+
+
+def test_availability_for_known_yoyo(client: TestClient, monkeypatch) -> None:
+    from yoyo_tracker.api import routes
+    from yoyo_tracker.core.models import StoreResult
+
+    created = client.post(
+        "/api/collection", json={"name": "Shutter", "brand": "YoYoFactory"}
+    ).json()
+
+    async def fake_check(name: str) -> list[StoreResult]:
+        assert name == "Shutter"
+        return [StoreResult(store="YoyoExpert", status="in-stock", price=44.99)]
+
+    monkeypatch.setattr(routes.availability, "check_availability", fake_check)
+
+    resp = client.get(f"/api/collection/{created['id']}/availability")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body[0]["store"] == "YoyoExpert"
+    assert body[0]["status"] == "in-stock"
+
+
+def test_availability_unknown_yoyo_returns_404(client: TestClient) -> None:
+    resp = client.get("/api/collection/99999/availability")
+    assert resp.status_code == 404
+
+
+def test_feed_filtered_by_tracked_names(client: TestClient, monkeypatch) -> None:
+    from yoyo_tracker.api import routes
+    from yoyo_tracker.core.models import RedditPost
+
+    client.post("/api/collection", json={"name": "Shutter", "brand": "YoYoFactory"})
+
+    async def fake_fetch(limit: int = 25) -> list[RedditPost]:
+        return [
+            RedditPost(title="New Shutter drop", url="u1", subreddit="Throwers"),
+            RedditPost(title="Unrelated chatter", url="u2", subreddit="Yoyo"),
+        ]
+
+    monkeypatch.setattr(routes.reddit, "fetch_feed", fake_fetch)
+
+    filtered = client.get("/api/feed").json()
+    assert [p["title"] for p in filtered] == ["New Shutter drop"]
+
+    everything = client.get("/api/feed?all=true").json()
+    assert len(everything) == 2
