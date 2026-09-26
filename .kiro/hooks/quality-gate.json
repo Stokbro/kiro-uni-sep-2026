@@ -1,0 +1,28 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Format and lint on save",
+      "description": "After the agent saves or edits a Python file, auto-format it and apply safe lint fixes with ruff, so the steering conventions (line length, import order, modern syntax) are enforced without a manual step.",
+      "trigger": "PostFileSave",
+      "matcher": "\\.py$",
+      "action": {
+        "type": "command",
+        "command": "ruff format yoyo_tracker tests && ruff check --fix yoyo_tracker tests"
+      },
+      "timeout": 60,
+      "enabled": true
+    },
+    {
+      "name": "Require tests for new core modules",
+      "description": "When the agent creates a new module under the pure core layer, inject a reminder to add matching tests, upholding the steering rule that core logic is always covered.",
+      "trigger": "PostFileCreate",
+      "matcher": "yoyo_tracker[\\\\/]core[\\\\/].+\\.py$",
+      "action": {
+        "type": "agent",
+        "prompt": "A new module was created under yoyo_tracker/core/. Per the project steering conventions, core logic must have test coverage. Add or extend a matching tests/test_<module>.py with unit tests (and property tests where an invariant applies), then run ruff and the touched tests before continuing."
+      },
+      "enabled": true
+    }
+  ]
+}

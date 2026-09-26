@@ -159,8 +159,7 @@ def list_collection(conn: sqlite3.Connection, query: str = "") -> list[YoyoOut]:
     if query:
         like = f"%{query}%"
         rows = conn.execute(
-            "SELECT * FROM collection WHERE name LIKE ? OR brand LIKE ? "
-            "ORDER BY id",
+            "SELECT * FROM collection WHERE name LIKE ? OR brand LIKE ? ORDER BY id",
             (like, like),
         ).fetchall()
     else:

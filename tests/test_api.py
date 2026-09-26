@@ -78,9 +78,7 @@ def test_wishlist_flow(client: TestClient) -> None:
 
 def test_cannot_wishlist_owned_item_returns_409(client: TestClient) -> None:
     client.post("/api/collection", json={"name": "Shutter", "brand": "YoYoFactory"})
-    resp = client.post(
-        "/api/wishlist", json={"name": "Shutter", "brand": "YoYoFactory"}
-    )
+    resp = client.post("/api/wishlist", json={"name": "Shutter", "brand": "YoYoFactory"})
     assert resp.status_code == 409
 
 
@@ -98,7 +96,6 @@ def test_acquire_moves_item(client: TestClient) -> None:
 def test_acquire_missing_returns_404(client: TestClient) -> None:
     resp = client.post("/api/wishlist/999/acquire")
     assert resp.status_code == 404
-
 
 
 # ---- Availability + feed endpoints (core patched to avoid network) -------------
