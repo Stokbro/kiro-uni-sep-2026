@@ -45,3 +45,6 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+markers = [
+    "anyio: run an async test under anyio (asyncio backend, see conftest)",
+]

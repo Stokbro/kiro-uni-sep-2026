@@ -18,3 +18,9 @@ def conn() -> Iterator[sqlite3.Connection]:
         yield connection
     finally:
         connection.close()
+
+
+@pytest.fixture
+def anyio_backend() -> str:
+    """Run @pytest.mark.anyio tests on asyncio only (no trio backend needed)."""
+    return "asyncio"
